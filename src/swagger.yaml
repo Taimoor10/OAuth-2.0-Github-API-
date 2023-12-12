@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: Github API
+  version: 1.0.0
+  description: API documentation for routes
+servers:
+  - url: 'http://localhost:3000/auth'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    githubOAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://github.com/login/oauth/authorize
+          tokenUrl:  http://localhost:3000/auth/github/callback
+          scopes:
+            user: Access the user's GitHub account
+paths:
+  /user/login:
+      post:
+        summary: User Login
+        description: Authenticate a user.
+        tags:
+          - Authentication
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+              examples:
+                SampleRequest:
+                  value:
+                    email: "your_email"
+                    password: "your_password"
+        responses:
+          200:
+            description: User is authenticated.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    accessToken:
+                      type: string
+          404:
+            description: User authentication failed.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+          500:
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+  /user/signup:
+      post:
+        summary: User Signup
+        description: Register a new user.
+        tags:
+          - Authentication
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  username:
+                    type: string
+                  password:
+                    type: string
+              examples:
+                SampleRequest:
+                  value:
+                    email: "email"
+                    username: "username"
+                    password: "password"
+        responses:
+          200:
+            description: User is registered.
+          400:
+            description: Bad request (e.g., user already registered).
+          500:
+            description: Internal server error
+
+  /github/connect:
+    get:
+      summary: Connect GitHub Account
+      description: Initiates the process to connect a GitHub account.
+      tags:
+        - Authentication
+      security:
+        - githubOAuth:
+            - user
+      responses:
+        200:
+          description: Successfully initiated GitHub account connection process
+  /github/profile:
+    get:
+      summary: Get user profile
+      description: Retrieve user profile information.
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User profile retrieved successfully
+        403:
+          description: Unauthorized
+        500:
+          description: Server error
+
+  /github/favorites/add:
+    post:
+      summary: Add a repository to favorites.
+      description: Add a repository to the user's favorites.
+      tags:
+        - Favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                repositoryName:
+                  type: string
+                owner:
+                  type: string
+            examples:
+              SampleRequest:
+                value:
+                  id: "your_github_id"
+                  repositoryName: "repository_name"
+                  owner: "your_github_handle"
+      responses:
+        200:
+          description: Repository added as a favorite.
+        400:
+          description: Bad request
+        500:
+          description: Server error
+  /github/favorites/remove:
+    post:
+      summary: Remove a repository from favorites.
+      description: Remove a repository from the user's favorites.
+      tags:
+        - Favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repositoryName:
+                  type: string
+            examples:
+              SampleRequest:
+                value:
+                  repositoryName: "SampleRepo"
+      responses:
+        200:
+          description: Repository removed from favorites.
+        400:
+          description: Bad request
+        500:
+          description: Server error
+  /github/favorites/list:
+   get:
+      summary: Get Favorite Repositories
+      description: Retrieve user favorite Repositories
+      tags:
+        - Favorites
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User favorite repositories retrieved successfully
+        403:
+          description: Unauthorized
+        500:
+          description: Server error
+  /github/search:
+   get:
+      summary: Search 
+      description: Search Queries for Repositories. I understand it is not highly 
+                   optimized or ideal but it will give you an idea on my approach.
+                   
+                   In case to retrieve user information, only provide user.
+
+                   In case to retrieve repositories of a user, provide both user and repository
+
+                   In case to retrieve a specific file, provide user, repository and name to the file
+                   
+                   In case to retrieve topics, just by providing the topic will fetch repositories by topics,
+                      therefore make sure that topic is not provided requesting other information
+      tags:
+        - Search
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repository
+          in: query
+          description: The repository name
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: The owner of the repository.
+          required: false
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: The topic or category of the resource.
+          required: false
+          schema:
+            type: string
+        - name: filePath
+          in: query
+          description: The name to the path of file.
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Search performed successfully
+        403:
+          description: Unauthorized
+        404:
+          description: Resource not found
+        500:
+          description: Server error
+          
+
