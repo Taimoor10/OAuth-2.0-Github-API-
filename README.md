@@ -1,13 +1,3 @@
-# challenge
-Code Challenge
-
-## Feedback
-   I enjoyed doing this coding challenge, It was well constructed and it allowed to explore some new stuff as well.
-   I did the challenge to the best of my knowledge, however there are several areas where things can be further improved
-   and optimized.
-
-   There are things like input validation and password strength check etc, but due to shortage of time, I wasn't able to perform that. I believe that it will give you idea of my approach for the demonstration purpose
-
 ## App Registration
 
    Create Github apps to obtain id and secrets for passport authentication here:
